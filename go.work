@@ -1,0 +1,10 @@
+go 1.19
+
+use (
+	.
+	./bytes
+	./cache
+	./examples
+	./printtracer
+	./runes
+)
