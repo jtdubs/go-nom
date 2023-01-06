@@ -40,7 +40,7 @@ func Expects[C comparable](want []C) ParseFn[C, []C] {
 	for i, w := range want {
 		fns[i] = Expect(w)
 	}
-	return Preceded(Seq(fns...), Success[C](want))
+	return Seq(fns...)
 }
 
 func Map[C comparable, T, U any](p ParseFn[C, T], fn func(T) U) ParseFn[C, U] {
