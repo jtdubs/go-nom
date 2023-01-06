@@ -112,13 +112,16 @@ func (bt *tracer[T]) Exit(name string, start, end nom.Cursor[T], result any, err
 		default:
 			fmt.Printf("< %v", result)
 		}
-		span := start.To(end)
-		if rs := reflect.ValueOf(span).Interface().(string); rs != "" {
-			if len(rs) > 20 {
-				fmt.Printf(" [from %q]", string(rs[:10])+"..."+string(rs[len(rs)-10:]))
+		span := reflect.ValueOf(start.To(end)).Interface()
+		switch rs := span.(type) {
+		case []rune:
+			s := string(rs)
+			if len(s) > 20 {
+				fmt.Printf(" [from %q]", string(s[:10])+"..."+string(s[len(s)-10:]))
 			} else {
-				fmt.Printf(" [from %q]", string(rs))
+				fmt.Printf(" [from %q]", string(s))
 			}
+		default:
 		}
 		fmt.Printf("\n")
 	} else {
