@@ -34,8 +34,13 @@ func CacheN[C comparable, T any](skip int, fn nom.ParseFn[C, T]) nom.ParseFn[C, 
 	if _, ok := caches[name]; !ok {
 		caches[name] = map[*C]cacheValue[C, T]{}
 	}
-	cache := caches[name].(map[*C]cacheValue[C, T])
-	if cache == nil {
+	anyCache, ok := caches[name]
+	if !ok {
+		log.Printf("Cache failed: unable to create cache for %q", name)
+		return fn
+	}
+	cache, ok := anyCache.(map[*C]cacheValue[C, T])
+	if !ok {
 		log.Printf("Cache failed: incompatible cache found for %q", name)
 		return fn
 	}
