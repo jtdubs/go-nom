@@ -166,6 +166,20 @@ func Satisfy[C comparable](testFn func(C) bool) ParseFn[C, C] {
 	}
 }
 
+func Pair[C comparable, T, U any](t ParseFn[C, T], u ParseFn[C, U]) ParseFn[C, Tuple[T, U]] {
+	return func(ctx context.Context, start Cursor[C]) (Cursor[C], Tuple[T, U], error) {
+		end, a, err := t(ctx, start)
+		if err != nil {
+			return start, zero[Tuple[T, U]](), err
+		}
+		end, b, err := u(ctx, end)
+		if err != nil {
+			return start, zero[Tuple[T, U]](), err
+		}
+		return end, Tuple[T, U]{a, b}, nil
+	}
+}
+
 func First[C comparable, T, U any](p ParseFn[C, Tuple[T, U]]) ParseFn[C, T] {
 	return Map(p, func(t Tuple[T, U]) T { return t.A })
 }
