@@ -23,7 +23,7 @@ func NewCursor[T comparable](ts []T) Cursor[T] {
 }
 
 func (c Cursor[T]) String() string {
-	return fmt.Sprintf("cursor(%v)", c.offset)
+	return fmt.Sprintf("Cursor(%v)", c.offset)
 }
 
 func (c Cursor[T]) WithTracer(t Tracer[T]) Cursor[T] {
