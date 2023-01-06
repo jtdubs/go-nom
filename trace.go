@@ -44,14 +44,14 @@ func TraceN[C comparable, T any](depth int, fn ParseFn[C, T]) ParseFn[C, T] {
 		}
 	}
 
-	return func(c Cursor[C]) (newC Cursor[C], res T, err error) {
-		tracer := c.Tracer()
+	return func(start Cursor[C]) (end Cursor[C], res T, err error) {
+		tracer := start.Tracer()
 		if tracer != nil {
-			tracer.Enter(name, c)
+			tracer.Enter(name, start)
 		}
-		newC, res, err = fn(c)
+		end, res, err = fn(start)
 		if tracer != nil {
-			tracer.Exit(name, c, newC, res, err)
+			tracer.Exit(name, start, end, res, err)
 		}
 		return
 	}
