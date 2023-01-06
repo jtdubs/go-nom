@@ -63,3 +63,14 @@ func TestSeparatedList1(t *testing.T) {
 	validate(t, "SeparatedList1(%q)", p, "H,H,J", 3, []rune("HH"), false)
 	validate(t, "SeparatedList1(%q)", p, "", 0, []rune(""), true)
 }
+
+func TestManyTill(t *testing.T) {
+	p := ManyTill(Satisfy(func(r rune) bool { return r >= '0' && r <= '9' }), Expect('X'))
+	validate(t, "ManyTill(%q)", p, "1234X hello", 5, Tuple[[]rune, rune]{[]rune("1234"), 'X'}, false)
+	validate(t, "ManyTill(%q)", p, "1234X", 5, Tuple[[]rune, rune]{[]rune("1234"), 'X'}, false)
+	validate(t, "ManyTill(%q)", p, "1234Y", 0, Tuple[[]rune, rune]{}, true)
+	validate(t, "ManyTill(%q)", p, "12c4X", 0, Tuple[[]rune, rune]{}, true)
+	validate(t, "ManyTill(%q)", p, "X", 1, Tuple[[]rune, rune]{nil, 'X'}, false)
+	validate(t, "ManyTill(%q)", p, "123", 0, Tuple[[]rune, rune]{}, true)
+	validate(t, "ManyTill(%q)", p, "", 0, Tuple[[]rune, rune]{}, true)
+}

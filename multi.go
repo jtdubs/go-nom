@@ -55,6 +55,28 @@ func ManyN[C comparable, T any](min, max int, p ParseFn[C, T]) ParseFn[C, []T] {
 	})
 }
 
+func ManyTill[C comparable, T, U any](f ParseFn[C, T], g ParseFn[C, U]) ParseFn[C, Tuple[[]T, U]] {
+	return Trace(func(start Cursor[C]) (end Cursor[C], res Tuple[[]T, U], err error) {
+		end = start
+		for {
+			var (
+				u U
+				t T
+			)
+			if end, u, err = g(end); err == nil {
+				res.B = u
+				return
+			}
+			if end, t, err = f(end); err != nil {
+				end = start
+				res.A = nil
+				return
+			}
+			res.A = append(res.A, t)
+		}
+	})
+}
+
 func SeparatedList0[C comparable, T, D any](delim ParseFn[C, D], values ParseFn[C, T]) ParseFn[C, []T] {
 	return Trace(func(start Cursor[C]) (Cursor[C], []T, error) {
 		var results []T
