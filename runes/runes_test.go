@@ -13,7 +13,7 @@ func validate[T any](t *testing.T, name string, p nom.ParseFn[rune, T], in strin
 	t.Helper()
 
 	name = fmt.Sprintf(name, in)
-	inCursor := nom.NewCursor([]rune(in))
+	inCursor := Cursor(in)
 	gotCursor, gotResult, err := p(inCursor)
 	if gotCursor.Position() != wantPosition {
 		t.Errorf("%v(%v) cursor = %v, want %v", name, inCursor, gotCursor.Position(), wantPosition)
@@ -40,6 +40,14 @@ func TestRune(t *testing.T) {
 	validate(t, "Rune(%q)", p, "", 0, rune(0), true)
 }
 
+func TestRuneNoCase(t *testing.T) {
+	p := RuneNoCase('H')
+	validate(t, "RuneNoCase(%q)", p, "Hello", 1, 'H', false)
+	validate(t, "RuneNoCase(%q)", p, "hello", 1, 'h', false)
+	validate(t, "RuneNoCase(%q)", p, "Jello", 0, rune(0), true)
+	validate(t, "RuneNoCase(%q)", p, "", 0, rune(0), true)
+}
+
 func TestTag(t *testing.T) {
 	p := Tag("Hello")
 	validate(t, "Tag(%q)", p, "Hello World", 5, "Hello", false)
@@ -49,6 +57,19 @@ func TestTag(t *testing.T) {
 	validate(t, "Tag(%q)", p, "Hell", 0, "", true)
 	validate(t, "Tag(%q)", p, "H", 0, "", true)
 	validate(t, "Tag(%q)", p, "", 0, "", true)
+}
+
+func TestTagNoCase(t *testing.T) {
+	p := TagNoCase("Hello")
+	validate(t, "TagNoCase(%q)", p, "Hello World", 5, "Hello", false)
+	validate(t, "TagNoCase(%q)", p, "Hello ", 5, "Hello", false)
+	validate(t, "TagNoCase(%q)", p, "Hello", 5, "Hello", false)
+	validate(t, "TagNoCase(%q)", p, "Hellf", 0, "", true)
+	validate(t, "TagNoCase(%q)", p, "Hell", 0, "", true)
+	validate(t, "TagNoCase(%q)", p, "H", 0, "", true)
+	validate(t, "TagNoCase(%q)", p, "", 0, "", true)
+	validate(t, "TagNoCase(%q)", p, "HELLO", 5, "HELLO", false)
+	validate(t, "TagNoCase(%q)", p, "hello", 5, "hello", false)
 }
 
 func TestOneOf(t *testing.T) {
@@ -94,6 +115,14 @@ func TestConcat(t *testing.T) {
 	validate(t, "String(%q)", p, "", 0, "", true)
 }
 
+func TestAlpha(t *testing.T) {
+	p := Alpha()
+	validate(t, "Alpha(%q)", p, "Hello World", 1, 'H', false)
+	validate(t, "Alpha(%q)", p, "H123", 1, 'H', false)
+	validate(t, "Alpha(%q)", p, "123Hello", 0, rune(0), true)
+	validate(t, "Alpha(%q)", p, "", 0, rune(0), true)
+}
+
 func TestAlpha0(t *testing.T) {
 	p := Alpha0()
 	validate(t, "Alpha0(%q)", p, "Hello World", 5, "Hello", false)
@@ -112,6 +141,14 @@ func TestAlpha1(t *testing.T) {
 	validate(t, "Alpha1(%q)", p, "", 0, "", true)
 }
 
+func TestDigit(t *testing.T) {
+	p := Digit()
+	validate(t, "Digit(%q)", p, "123 hello", 1, '1', false)
+	validate(t, "Digit(%q)", p, "1g", 1, '1', false)
+	validate(t, "Digit(%q)", p, "hello", 0, rune(0), true)
+	validate(t, "Digit(%q)", p, "", 0, rune(0), true)
+}
+
 func TestDigit0(t *testing.T) {
 	p := Digit0()
 	validate(t, "Digit0(%q)", p, "123 hello", 3, "123", false)
@@ -126,6 +163,15 @@ func TestDigit1(t *testing.T) {
 	validate(t, "Digit1(%q)", p, "1g", 1, "1", false)
 	validate(t, "Digit1(%q)", p, "hello", 0, "", true)
 	validate(t, "Digit1(%q)", p, "", 0, "", true)
+}
+
+func TestHexDigit(t *testing.T) {
+	p := HexDigit()
+	validate(t, "HexDigit(%q)", p, "123 hello", 1, '1', false)
+	validate(t, "HexDigit(%q)", p, "1g", 1, '1', false)
+	validate(t, "HexDigit(%q)", p, "f1c23q", 1, 'f', false)
+	validate(t, "HexDigit(%q)", p, "jello", 0, rune(0), true)
+	validate(t, "HexDigit(%q)", p, "", 0, rune(0), true)
 }
 
 func TestHexDigit0(t *testing.T) {
@@ -144,6 +190,14 @@ func TestHexDigit1(t *testing.T) {
 	validate(t, "HexDigit1(%q)", p, "1fc23q", 5, "1fc23", false)
 	validate(t, "HexDigit1(%q)", p, "jello", 0, "", true)
 	validate(t, "HexDigit1(%q)", p, "", 0, "", true)
+}
+
+func TestOctDigit(t *testing.T) {
+	p := OctDigit()
+	validate(t, "OctDigit(%q)", p, "123 hello", 1, '1', false)
+	validate(t, "OctDigit(%q)", p, "18", 1, '1', false)
+	validate(t, "OctDigit(%q)", p, "jello", 0, rune(0), true)
+	validate(t, "OctDigit(%q)", p, "", 0, rune(0), true)
 }
 
 func TestOctDigit0(t *testing.T) {
@@ -169,11 +223,26 @@ func TestAlphanumeric0(t *testing.T) {
 	validate(t, "Alphanumeric0(%q)", p, "", 0, "", false)
 }
 
+func TestAlphanumeric(t *testing.T) {
+	p := Alphanumeric()
+	validate(t, "Alphanumeric(%q)", p, "hello123world", 1, 'h', false)
+	validate(t, "Alphanumeric(%q)", p, "h", 1, 'h', false)
+	validate(t, "Alphanumeric(%q)", p, "", 0, rune(0), true)
+}
+
 func TestAlphanumeric1(t *testing.T) {
 	p := Alphanumeric1()
 	validate(t, "Alphanumeric1(%q)", p, "hello123world", 13, "hello123world", false)
 	validate(t, "Alphanumeric1(%q)", p, "h", 1, "h", false)
 	validate(t, "Alphanumeric1(%q)", p, "", 0, "", true)
+}
+
+func TestSpace(t *testing.T) {
+	p := Space()
+	validate(t, "Space(%q)", p, " \t  hi", 1, ' ', false)
+	validate(t, "Space(%q)", p, "\t hi", 1, '\t', false)
+	validate(t, "Space(%q)", p, "hi", 0, rune(0), true)
+	validate(t, "Space(%q)", p, "", 0, rune(0), true)
 }
 
 func TestSpace0(t *testing.T) {
@@ -190,6 +259,14 @@ func TestSpace1(t *testing.T) {
 	validate(t, "Space1(%q)", p, " hi", 1, " ", false)
 	validate(t, "Space1(%q)", p, "hi", 0, "", true)
 	validate(t, "Space1(%q)", p, "", 0, "", true)
+}
+
+func TestMultispace(t *testing.T) {
+	p := Multispace()
+	validate(t, "Multispace(%q)", p, " \t  \r\nhi", 1, ' ', false)
+	validate(t, "Multispace(%q)", p, "\r hi", 1, '\r', false)
+	validate(t, "Multispace(%q)", p, "hi", 0, rune(0), true)
+	validate(t, "Multispace(%q)", p, "", 0, rune(0), true)
 }
 
 func TestMultispace0(t *testing.T) {
@@ -214,4 +291,20 @@ func TestSign(t *testing.T) {
 	validate(t, "Sign(%q)", p, "-foo", 1, '-', false)
 	validate(t, "Sign(%q)", p, "f+oo", 0, rune(0), true)
 	validate(t, "Sign(%q)", p, "", 0, rune(0), true)
+}
+
+func TestPhrase(t *testing.T) {
+	p := Phrase(Alpha1(), Alpha1())
+	validate(t, "Alpha1(%q)", p, "hello world", 11, []string{"hello", "world"}, false)
+	validate(t, "Alpha1(%q)", p, "   hello world", 14, []string{"hello", "world"}, false)
+	validate(t, "Alpha1(%q)", p, "hello \t world  ", 13, []string{"hello", "world"}, false)
+	validate(t, "Alpha1(%q)", p, "hello \t ", 0, nil, true)
+}
+
+func TestSurrounded(t *testing.T) {
+	p := SurroundedBy('(', ')', Alpha1())
+	validate(t, "SurroundedBy(%q)", p, " ( hi ) ", 7, "hi", false)
+	validate(t, "SurroundedBy(%q)", p, " ( hi | ", 0, "", true)
+	validate(t, "SurroundedBy(%q)", p, " | hi ) ", 0, "", true)
+	validate(t, "SurroundedBy(%q)", p, " ( 123 ) ", 0, "", true)
 }

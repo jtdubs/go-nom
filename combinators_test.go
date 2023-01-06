@@ -157,3 +157,10 @@ func TestSatisfy(t *testing.T) {
 	validate(t, "Satisfy(%q)", p, "J", 0, rune(0), true)
 	validate(t, "Satisfy(%q)", p, "", 0, rune(0), true)
 }
+
+func TestDiscard(t *testing.T) {
+	p := Discard(Expect('H'))
+	validate(t, "Discard(%q)", p, "Hello", 1, struct{}{}, false)
+	validate(t, "Discard(%q)", p, "Jello", 0, struct{}{}, true)
+	validate(t, "Discard(%q)", p, "", 0, struct{}{}, true)
+}
