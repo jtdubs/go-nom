@@ -92,7 +92,7 @@ func Verify[C comparable, T any](p ParseFn[C, T], checkFn func(T) bool) ParseFn[
 	})
 }
 
-func Value[C comparable, T, U any](p ParseFn[C, T], val U) ParseFn[C, U] {
+func Value[C comparable, T, U any](val U, p ParseFn[C, T]) ParseFn[C, U] {
 	return Trace(func(start Cursor[C]) (Cursor[C], U, error) {
 		end, _, err := p(start)
 		if err != nil {
@@ -134,7 +134,7 @@ func Recognize[C comparable, T any](p ParseFn[C, T]) ParseFn[C, []C] {
 	})
 }
 
-func Bind[C comparable, T any](p ParseFn[C, T], place *T) ParseFn[C, struct{}] {
+func Bind[C comparable, T any](place *T, p ParseFn[C, T]) ParseFn[C, struct{}] {
 	return Trace(func(start Cursor[C]) (Cursor[C], struct{}, error) {
 		end, res, err := p(start)
 		if err != nil {
@@ -163,4 +163,12 @@ func Satisfy[C comparable](testFn func(C) bool) ParseFn[C, C] {
 		}
 		return start.Next(), got, nil
 	})
+}
+
+func First[C comparable, T, U any](p ParseFn[C, Tuple[T, U]]) ParseFn[C, T] {
+	return Trace(Map(p, func(t Tuple[T, U]) T { return t.A }))
+}
+
+func Second[C comparable, T, U any](p ParseFn[C, Tuple[T, U]]) ParseFn[C, U] {
+	return Trace(Map(p, func(t Tuple[T, U]) U { return t.B }))
 }

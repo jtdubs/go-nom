@@ -99,7 +99,7 @@ func TestVerify(t *testing.T) {
 }
 
 func TestValue(t *testing.T) {
-	p := Value(Expect('H'), 42)
+	p := Value(42, Expect('H'))
 	validate(t, "Value(%q)", p, "Hello", 1, 42, false)
 	validate(t, "Value(%q)", p, "Jello", 0, 0, true)
 	validate(t, "Value(%q)", p, "", 0, 0, true)
@@ -142,7 +142,7 @@ func TestRecognize(t *testing.T) {
 
 func TestBind(t *testing.T) {
 	var got rune
-	p := Bind(Alt(Expect('H'), Expect('J')), &got)
+	p := Bind(&got, Alt(Expect('H'), Expect('J')))
 	validateBind(t, "Bind(%q)", p, "Hello", 1, struct{}{}, false, &got, 'H')
 	validateBind(t, "Bind(%q)", p, "Jello", 1, struct{}{}, false, &got, 'J')
 	validateBind(t, "Bind(%q)", p, "Cello", 0, struct{}{}, true, &got, rune(0))

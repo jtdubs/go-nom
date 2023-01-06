@@ -76,13 +76,12 @@ func SumExpression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 	be := &BinaryExpr{}
 	return CT(
 		nom.Alt(
-			nom.Value(
+			nom.Value(Expr(be),
 				runes.Phrase(
-					nom.Bind(ProductExpression, &be.L),
-					nom.Bind(SumOperator, &be.Op),
-					nom.Bind(SumExpression, &be.R),
+					nom.Bind(&be.L, ProductExpression),
+					nom.Bind(&be.Op, SumOperator),
+					nom.Bind(&be.R, SumExpression),
 				),
-				Expr(be),
 			),
 			ProductExpression,
 		),
@@ -97,13 +96,12 @@ func ProductExpression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 	be := &BinaryExpr{}
 	return CT(
 		nom.Alt(
-			nom.Value(
+			nom.Value(Expr(be),
 				runes.Phrase(
-					nom.Bind(Term, &be.L),
-					nom.Bind(ProductOperator, &be.Op),
-					nom.Bind(ProductExpression, &be.R),
+					nom.Bind(&be.L, Term),
+					nom.Bind(&be.Op, ProductOperator),
+					nom.Bind(&be.R, ProductExpression),
 				),
-				Expr(be),
 			),
 			Term,
 		),
