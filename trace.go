@@ -10,8 +10,8 @@ var (
 )
 
 type Tracer[T comparable] interface {
-	Enter(name string, cursor Cursor[T])
-	Exit(name string, oldCursor, newCursor Cursor[T], result any, err error)
+	Enter(name string, start Cursor[T])
+	Exit(name string, start, end Cursor[T], result any, err error)
 }
 
 func EnableTrace() {
