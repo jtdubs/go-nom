@@ -216,62 +216,6 @@ func Recognize[T any](p nom.ParseFn[rune, T]) nom.ParseFn[rune, string] {
 	return Join(nom.Recognize(p))
 }
 
-func RecognizeSeq[T any](ps ...nom.ParseFn[rune, T]) nom.ParseFn[rune, string] {
-	return Recognize(nom.Seq(ps...))
-}
-
-func RecognizeSeq2[A, B any](
-	a nom.ParseFn[rune, A],
-	b nom.ParseFn[rune, B],
-) nom.ParseFn[rune, string] {
-	return RecognizeSeq(
-		nom.Discard(a),
-		nom.Discard(b),
-	)
-}
-
-func RecognizeSeq3[A, B, C any](
-	a nom.ParseFn[rune, A],
-	b nom.ParseFn[rune, B],
-	c nom.ParseFn[rune, C],
-) nom.ParseFn[rune, string] {
-	return RecognizeSeq(
-		nom.Discard(a),
-		nom.Discard(b),
-		nom.Discard(c),
-	)
-}
-
-func RecognizeSeq4[A, B, C, D any](
-	a nom.ParseFn[rune, A],
-	b nom.ParseFn[rune, B],
-	c nom.ParseFn[rune, C],
-	d nom.ParseFn[rune, D],
-) nom.ParseFn[rune, string] {
-	return RecognizeSeq(
-		nom.Discard(a),
-		nom.Discard(b),
-		nom.Discard(c),
-		nom.Discard(d),
-	)
-}
-
-func RecognizeSeq5[A, B, C, D, E any](
-	a nom.ParseFn[rune, A],
-	b nom.ParseFn[rune, B],
-	c nom.ParseFn[rune, C],
-	d nom.ParseFn[rune, D],
-	e nom.ParseFn[rune, E],
-) nom.ParseFn[rune, string] {
-	return RecognizeSeq(
-		nom.Discard(a),
-		nom.Discard(b),
-		nom.Discard(c),
-		nom.Discard(d),
-		nom.Discard(e),
-	)
-}
-
 func Concat(p nom.ParseFn[rune, []string]) nom.ParseFn[rune, string] {
 	return nom.Map(p, func(ss []string) string {
 		var result string
