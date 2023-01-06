@@ -1,4 +1,4 @@
-package nom
+package fn
 
 import (
 	"context"
@@ -8,13 +8,14 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/jtdubs/go-nom"
 )
 
-func validate[T any](t *testing.T, name string, p ParseFn[rune, T], in string, wantPosition int, wantResult T, wantError bool) bool {
+func validate[T any](t *testing.T, name string, p nom.ParseFn[rune, T], in string, wantPosition int, wantResult T, wantError bool) bool {
 	t.Helper()
 
 	name = fmt.Sprintf(name, in)
-	inCursor := NewCursor([]rune(in))
+	inCursor := nom.NewCursor([]rune(in))
 	gotCursor, gotResult, err := p(context.Background(), inCursor)
 	if gotCursor.Position() != wantPosition {
 		t.Errorf("%v(%q) cursor = %v, want %v", name, inCursor, gotCursor.Position(), wantPosition)
@@ -35,7 +36,7 @@ func validate[T any](t *testing.T, name string, p ParseFn[rune, T], in string, w
 	return true
 }
 
-func validateBind[T any](t *testing.T, name string, p ParseFn[rune, T], in string, wantPosition int, wantResult T, wantError bool, got *rune, want rune) bool {
+func validateBind[T any](t *testing.T, name string, p nom.ParseFn[rune, T], in string, wantPosition int, wantResult T, wantError bool, got *rune, want rune) bool {
 	t.Helper()
 	*got = rune(0)
 	if !validate(t, name, p, in, wantPosition, wantResult, wantError) {

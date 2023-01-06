@@ -7,6 +7,7 @@ import (
 
 	"github.com/jtdubs/go-nom"
 	"github.com/jtdubs/go-nom/cache"
+	"github.com/jtdubs/go-nom/fn"
 	"github.com/jtdubs/go-nom/runes"
 	"github.com/jtdubs/go-nom/trace"
 	"github.com/jtdubs/go-nom/trace/printtracer"
@@ -63,11 +64,11 @@ func Number(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr
 		return &NumExpr{n}
 	}
 
-	return CT(nom.Map(runes.Digit1, atoi))(ctx, start)
+	return CT(fn.Map(runes.Digit1, atoi))(ctx, start)
 }
 
 func Expression(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
-	return CT(nom.Alt(Parens, SumExpression))(ctx, start)
+	return CT(fn.Alt(Parens, SumExpression))(ctx, start)
 }
 
 func Parens(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
@@ -77,12 +78,12 @@ func Parens(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr
 func SumExpression(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 	be := &BinaryExpr{}
 	return CT(
-		nom.Alt(
-			nom.Value(Expr(be),
+		fn.Alt(
+			fn.Value(Expr(be),
 				runes.Phrase(
-					nom.Bind(&be.L, ProductExpression),
-					nom.Bind(&be.Op, SumOperator),
-					nom.Bind(&be.R, SumExpression),
+					fn.Bind(&be.L, ProductExpression),
+					fn.Bind(&be.Op, SumOperator),
+					fn.Bind(&be.R, SumExpression),
 				),
 			),
 			ProductExpression,
@@ -97,12 +98,12 @@ func SumOperator(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune],
 func ProductExpression(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 	be := &BinaryExpr{}
 	return CT(
-		nom.Alt(
-			nom.Value(Expr(be),
+		fn.Alt(
+			fn.Value(Expr(be),
 				runes.Phrase(
-					nom.Bind(&be.L, Term),
-					nom.Bind(&be.Op, ProductOperator),
-					nom.Bind(&be.R, ProductExpression),
+					fn.Bind(&be.L, Term),
+					fn.Bind(&be.Op, ProductOperator),
+					fn.Bind(&be.R, ProductExpression),
 				),
 			),
 			Term,
@@ -115,7 +116,7 @@ func ProductOperator(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[ru
 }
 
 func Term(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
-	return CT(nom.Alt(Number, Parens))(ctx, start)
+	return CT(fn.Alt(Number, Parens))(ctx, start)
 }
 
 func init() {

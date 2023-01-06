@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jtdubs/go-nom"
+	"github.com/jtdubs/go-nom/fn"
 )
 
 func validate[T any](t *testing.T, name string, p nom.ParseFn[rune, T], in string, wantPosition int, wantResult T, wantError bool) {
@@ -303,14 +304,14 @@ func TestSurrounded(t *testing.T) {
 }
 
 func TestRecognize(t *testing.T) {
-	p := Recognize(nom.Discard(Alpha1))
+	p := Recognize(fn.Discard(Alpha1))
 	validate(t, "Recognize(%q)", p, "Hello world", 5, "Hello", false)
 	validate(t, "Recognize(%q)", p, "H", 1, "H", false)
 	validate(t, "Recognize(%q)", p, "", 0, "", true)
 }
 
 func TestConcat(t *testing.T) {
-	p := Concat(nom.Seq(Alpha1, Space1, Alpha1))
+	p := Concat(fn.Seq(Alpha1, Space1, Alpha1))
 	validate(t, "Concat(%q)", p, "Hello world", 11, "Hello world", false)
 	validate(t, "Concat(%q)", p, "H", 0, "", true)
 	validate(t, "Concat(%q)", p, "", 0, "", true)

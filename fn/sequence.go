@@ -1,9 +1,14 @@
-package nom
+package fn
 
-import "context"
+import (
+	"context"
 
-func Seq[C comparable, T any](ps ...ParseFn[C, T]) ParseFn[C, []T] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
+	"github.com/jtdubs/go-nom"
+	"github.com/jtdubs/go-nom/trace"
+)
+
+func Seq[C comparable, T any](ps ...nom.ParseFn[C, T]) nom.ParseFn[C, []T] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], []T, error) {
 		var results []T
 		end := start
 		for _, p := range ps {
@@ -18,11 +23,11 @@ func Seq[C comparable, T any](ps ...ParseFn[C, T]) ParseFn[C, []T] {
 			results = append(results, result)
 		}
 		return end, results, nil
-	}
+	})
 }
 
-func Surrounded[C comparable, F, L, M any](first ParseFn[C, F], last ParseFn[C, L], middle ParseFn[C, M]) ParseFn[C, M] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], M, error) {
+func Surrounded[C comparable, F, L, M any](first nom.ParseFn[C, F], last nom.ParseFn[C, L], middle nom.ParseFn[C, M]) nom.ParseFn[C, M] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], M, error) {
 		var (
 			res M
 			err error
@@ -38,11 +43,11 @@ func Surrounded[C comparable, F, L, M any](first ParseFn[C, F], last ParseFn[C, 
 			return start, zero[M](), err
 		}
 		return end, res, nil
-	}
+	})
 }
 
-func Preceded[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B]) ParseFn[C, B] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], B, error) {
+func Preceded[C comparable, A, B any](first nom.ParseFn[C, A], second nom.ParseFn[C, B]) nom.ParseFn[C, B] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], B, error) {
 		var (
 			res B
 			err error
@@ -55,11 +60,11 @@ func Preceded[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B])
 			return start, zero[B](), err
 		}
 		return end, res, nil
-	}
+	})
 }
 
-func Terminated[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B]) ParseFn[C, A] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], A, error) {
+func Terminated[C comparable, A, B any](first nom.ParseFn[C, A], second nom.ParseFn[C, B]) nom.ParseFn[C, A] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], A, error) {
 		var (
 			res A
 			err error
@@ -74,5 +79,5 @@ func Terminated[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B
 			return start, zero[A](), err
 		}
 		return end, res, nil
-	}
+	})
 }

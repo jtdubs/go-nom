@@ -1,4 +1,4 @@
-package nom
+package fn
 
 import (
 	"testing"

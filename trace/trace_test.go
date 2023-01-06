@@ -2,6 +2,8 @@ package trace
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/jtdubs/go-nom"
@@ -27,11 +29,34 @@ func (t *testTracer) Exit(_ context.Context, name string, start, end nom.Cursor[
 }
 
 func testParseWord(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], []rune, error) {
-	return Trace(nom.Many1(testParseChar))(ctx, start)
+	return Trace(func(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], []rune, error) {
+		// Many1 (inlined to avoid import cycles)
+		end, res, err := testParseChar(ctx, start)
+		if err != nil {
+			return start, nil, err
+		}
+		var results []rune
+		for err == nil {
+			results = append(results, res)
+			end, res, err = testParseChar(ctx, end)
+		}
+		return end, results, nil
+	})(ctx, start)
 }
 
 func testParseChar(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return Trace(nom.Satisfy(func(r rune) bool { return r >= '0' && r <= '9' }))(ctx, start)
+	return Trace(func(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+		// Satisfy (inlined  to avoid import cycles)
+		if start.EOF() {
+			return start, rune(0), errors.New("EOF")
+		}
+		got := start.Read()
+		test := got >= '0' && got <= '9'
+		if !test {
+			return start, rune(0), fmt.Errorf("%v does not satisfy test", got)
+		}
+		return start.Next(), got, nil
+	})(ctx, start)
 }
 
 func TestTracing(t *testing.T) {

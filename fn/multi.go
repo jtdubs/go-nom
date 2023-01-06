@@ -1,12 +1,15 @@
-package nom
+package fn
 
 import (
 	"context"
 	"fmt"
+
+	"github.com/jtdubs/go-nom"
+	"github.com/jtdubs/go-nom/trace"
 )
 
-func Many0[C comparable, T any](p ParseFn[C, T]) ParseFn[C, []T] {
-	return func(ctx context.Context, start Cursor[C]) (end Cursor[C], results []T, err error) {
+func Many0[C comparable, T any](p nom.ParseFn[C, T]) nom.ParseFn[C, []T] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (end nom.Cursor[C], results []T, err error) {
 		end = start
 		for {
 			var res T
@@ -16,11 +19,11 @@ func Many0[C comparable, T any](p ParseFn[C, T]) ParseFn[C, []T] {
 			}
 			results = append(results, res)
 		}
-	}
+	})
 }
 
-func Many1[C comparable, T any](p ParseFn[C, T]) ParseFn[C, []T] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
+func Many1[C comparable, T any](p nom.ParseFn[C, T]) nom.ParseFn[C, []T] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], []T, error) {
 		end, res, err := p(ctx, start)
 		if err != nil {
 			return start, nil, err
@@ -31,11 +34,11 @@ func Many1[C comparable, T any](p ParseFn[C, T]) ParseFn[C, []T] {
 			end, res, err = p(ctx, end)
 		}
 		return end, results, nil
-	}
+	})
 }
 
-func ManyN[C comparable, T any](min, max int, p ParseFn[C, T]) ParseFn[C, []T] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
+func ManyN[C comparable, T any](min, max int, p nom.ParseFn[C, T]) nom.ParseFn[C, []T] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], []T, error) {
 		end := start
 		var (
 			results []T
@@ -53,11 +56,11 @@ func ManyN[C comparable, T any](min, max int, p ParseFn[C, T]) ParseFn[C, []T] {
 			return start, nil, fmt.Errorf("ManyN() got %v, wanted [%v, %v]", len(results), min, max)
 		}
 		return end, results, nil
-	}
+	})
 }
 
-func ManyTill[C comparable, T, U any](f ParseFn[C, T], g ParseFn[C, U]) ParseFn[C, Tuple[[]T, U]] {
-	return func(ctx context.Context, start Cursor[C]) (end Cursor[C], res Tuple[[]T, U], err error) {
+func ManyTill[C comparable, T, U any](f nom.ParseFn[C, T], g nom.ParseFn[C, U]) nom.ParseFn[C, nom.Tuple[[]T, U]] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (end nom.Cursor[C], res nom.Tuple[[]T, U], err error) {
 		end = start
 		for {
 			var (
@@ -75,11 +78,11 @@ func ManyTill[C comparable, T, U any](f ParseFn[C, T], g ParseFn[C, U]) ParseFn[
 			}
 			res.A = append(res.A, t)
 		}
-	}
+	})
 }
 
-func SeparatedList0[C comparable, T, D any](delim ParseFn[C, D], values ParseFn[C, T]) ParseFn[C, []T] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
+func SeparatedList0[C comparable, T, D any](delim nom.ParseFn[C, D], values nom.ParseFn[C, T]) nom.ParseFn[C, []T] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], []T, error) {
 		var results []T
 		end, res, err := values(ctx, start)
 		if err != nil {
@@ -98,11 +101,11 @@ func SeparatedList0[C comparable, T, D any](delim ParseFn[C, D], values ParseFn[
 			end = valueEnd
 			results = append(results, res)
 		}
-	}
+	})
 }
 
-func SeparatedList1[C comparable, T, D any](delim ParseFn[C, D], values ParseFn[C, T]) ParseFn[C, []T] {
-	return func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
+func SeparatedList1[C comparable, T, D any](delim nom.ParseFn[C, D], values nom.ParseFn[C, T]) nom.ParseFn[C, []T] {
+	return trace.Trace(func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], []T, error) {
 		end, res, err := values(ctx, start)
 		if err != nil {
 			return start, nil, err
@@ -120,5 +123,5 @@ func SeparatedList1[C comparable, T, D any](delim ParseFn[C, D], values ParseFn[
 			end = valueEnd
 			results = append(results, res)
 		}
-	}
+	})
 }
