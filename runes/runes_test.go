@@ -1,6 +1,7 @@
 package runes
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -14,7 +15,7 @@ func validate[T any](t *testing.T, name string, p nom.ParseFn[rune, T], in strin
 
 	name = fmt.Sprintf(name, in)
 	inCursor := Cursor(in)
-	gotCursor, gotResult, err := p(inCursor)
+	gotCursor, gotResult, err := p(context.Background(), inCursor)
 	if gotCursor.Position() != wantPosition {
 		t.Errorf("%v(%v) cursor = %v, want %v", name, inCursor, gotCursor.Position(), wantPosition)
 		return

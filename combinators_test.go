@@ -1,6 +1,7 @@
 package nom
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -14,7 +15,7 @@ func validate[T any](t *testing.T, name string, p ParseFn[rune, T], in string, w
 
 	name = fmt.Sprintf(name, in)
 	inCursor := NewCursor([]rune(in))
-	gotCursor, gotResult, err := p(inCursor)
+	gotCursor, gotResult, err := p(context.Background(), inCursor)
 	if gotCursor.Position() != wantPosition {
 		t.Errorf("%v(%q) cursor = %v, want %v", name, inCursor, gotCursor.Position(), wantPosition)
 		return false

@@ -1,6 +1,7 @@
 package nom
 
 import (
+	"context"
 	"runtime"
 	"strings"
 )
@@ -44,12 +45,12 @@ func TraceN[C comparable, T any](depth int, fn ParseFn[C, T]) ParseFn[C, T] {
 		}
 	}
 
-	return func(start Cursor[C]) (end Cursor[C], res T, err error) {
+	return func(ctx context.Context, start Cursor[C]) (end Cursor[C], res T, err error) {
 		tracer := start.Tracer()
 		if tracer != nil {
 			tracer.Enter(name, start)
 		}
-		end, res, err = fn(start)
+		end, res, err = fn(ctx, start)
 		if tracer != nil {
 			tracer.Exit(name, start, end, res, err)
 		}

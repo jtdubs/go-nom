@@ -1,6 +1,7 @@
 package bytes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func Byte(want byte) nom.ParseFn[byte, byte] {
-	return nom.Trace(func(start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
+	return nom.Trace(func(_ context.Context, start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
 		if start.EOF() {
 			return start, 0, fmt.Errorf("got %v, want EOF", start.Read())
 		}
@@ -28,7 +29,7 @@ func Tag(tag string) nom.ParseFn[byte, string] {
 }
 
 func Satisfy(testFn func(byte) bool) nom.ParseFn[byte, byte] {
-	return nom.Trace(func(start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
+	return nom.Trace(func(_ context.Context, start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
 		if start.EOF() {
 			return start, 0, errors.New("EOF")
 		}
@@ -46,7 +47,7 @@ func OneOf(allowlist []byte) nom.ParseFn[byte, byte] {
 		lookup[b] = struct{}{}
 	}
 
-	return nom.Trace(func(start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
+	return nom.Trace(func(_ context.Context, start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
 		if start.EOF() {
 			return start, 0, errors.New("EOF")
 		}
@@ -64,7 +65,7 @@ func NoneOf(blocklist []byte) nom.ParseFn[byte, byte] {
 		lookup[b] = struct{}{}
 	}
 
-	return nom.Trace(func(start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
+	return nom.Trace(func(_ context.Context, start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
 		if start.EOF() {
 			return start, 0, errors.New("EOF")
 		}
@@ -77,7 +78,7 @@ func NoneOf(blocklist []byte) nom.ParseFn[byte, byte] {
 }
 
 func Any() nom.ParseFn[byte, byte] {
-	return nom.Trace(func(start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
+	return nom.Trace(func(_ context.Context, start nom.Cursor[byte]) (nom.Cursor[byte], byte, error) {
 		if start.EOF() {
 			return start, 0, errors.New("EOF")
 		}

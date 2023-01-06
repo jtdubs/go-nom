@@ -1,6 +1,7 @@
 package runes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -35,7 +36,7 @@ func TagNoCase(tag string) nom.ParseFn[rune, string] {
 }
 
 func OneOf(allowlist string) nom.ParseFn[rune, rune] {
-	return nom.Trace(func(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(func(_ context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
 		if start.EOF() {
 			return start, rune(0), errors.New("EOF")
 		}
@@ -48,7 +49,7 @@ func OneOf(allowlist string) nom.ParseFn[rune, rune] {
 }
 
 func NoneOf(blocklist string) nom.ParseFn[rune, rune] {
-	return nom.Trace(func(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(func(_ context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
 		if start.EOF() {
 			return start, rune(0), errors.New("EOF")
 		}
@@ -60,12 +61,12 @@ func NoneOf(blocklist string) nom.ParseFn[rune, rune] {
 	})
 }
 
-func EOL(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Preceded(nom.Opt(Rune('\r')), Rune('\n')))(start)
+func EOL(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Preceded(nom.Opt(Rune('\r')), Rune('\n')))(ctx, start)
 }
 
-func Newline(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return Rune('\n')(start)
+func Newline(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return Rune('\n')(ctx, start)
 }
 
 func IsAlpha(r rune) bool {
@@ -100,92 +101,92 @@ func IsSign(r rune) bool {
 	return r == '+' || r == '-'
 }
 
-func Alpha(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsAlpha))(start)
+func Alpha(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsAlpha))(ctx, start)
 }
 
-func Alpha0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlpha))))(start)
+func Alpha0(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlpha))))(ctx, start)
 }
 
-func Alpha1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlpha))))(start)
+func Alpha1(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlpha))))(ctx, start)
 }
 
-func Digit(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsDigit))(start)
+func Digit(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsDigit))(ctx, start)
 }
 
-func Digit0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsDigit))))(start)
+func Digit0(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsDigit))))(ctx, start)
 }
 
-func Digit1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsDigit))))(start)
+func Digit1(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsDigit))))(ctx, start)
 }
 
-func HexDigit(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsHexDigit))(start)
+func HexDigit(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsHexDigit))(ctx, start)
 }
 
-func HexDigit0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsHexDigit))))(start)
+func HexDigit0(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsHexDigit))))(ctx, start)
 }
 
-func HexDigit1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsHexDigit))))(start)
+func HexDigit1(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsHexDigit))))(ctx, start)
 }
 
-func OctalDigit(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsOctalDigit))(start)
+func OctalDigit(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsOctalDigit))(ctx, start)
 }
 
-func OctalDigit0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsOctalDigit))))(start)
+func OctalDigit0(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsOctalDigit))))(ctx, start)
 }
 
-func OctalDigit1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsOctalDigit))))(start)
+func OctalDigit1(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsOctalDigit))))(ctx, start)
 }
 
-func Alphanumeric(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsAlphanumeric))(start)
+func Alphanumeric(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsAlphanumeric))(ctx, start)
 }
 
-func Alphanumeric0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlphanumeric))))(start)
+func Alphanumeric0(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlphanumeric))))(ctx, start)
 }
 
-func Alphanumeric1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlphanumeric))))(start)
+func Alphanumeric1(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlphanumeric))))(ctx, start)
 }
 
-func Space(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsSpace))(start)
+func Space(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsSpace))(ctx, start)
 }
 
-func Space0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsSpace))))(start)
+func Space0(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsSpace))))(ctx, start)
 }
 
-func Space1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsSpace))))(start)
+func Space1(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsSpace))))(ctx, start)
 }
 
-func Multispace(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsMultispace))(start)
+func Multispace(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsMultispace))(ctx, start)
 }
 
-func Multispace0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsMultispace))))(start)
+func Multispace0(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsMultispace))))(ctx, start)
 }
 
-func Multispace1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsMultispace))))(start)
+func Multispace1(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsMultispace))))(ctx, start)
 }
 
-func Sign(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return nom.Trace(nom.Satisfy(IsSign))(start)
+func Sign(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsSign))(ctx, start)
 }
 
 func Phrase[T any](ps ...nom.ParseFn[rune, T]) nom.ParseFn[rune, []T] {

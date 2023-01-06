@@ -1,7 +1,9 @@
 package nom
 
+import "context"
+
 func Seq[C comparable, T any](ps ...ParseFn[C, T]) ParseFn[C, []T] {
-	return Trace(func(start Cursor[C]) (Cursor[C], []T, error) {
+	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
 		var results []T
 		end := start
 		for _, p := range ps {
@@ -9,7 +11,7 @@ func Seq[C comparable, T any](ps ...ParseFn[C, T]) ParseFn[C, []T] {
 				result T
 				err    error
 			)
-			end, result, err = p(end)
+			end, result, err = p(ctx, end)
 			if err != nil {
 				return start, nil, err
 			}
@@ -20,19 +22,19 @@ func Seq[C comparable, T any](ps ...ParseFn[C, T]) ParseFn[C, []T] {
 }
 
 func Surrounded[C comparable, F, L, M any](first ParseFn[C, F], last ParseFn[C, L], middle ParseFn[C, M]) ParseFn[C, M] {
-	return Trace(func(start Cursor[C]) (Cursor[C], M, error) {
+	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], M, error) {
 		var (
 			res M
 			err error
 		)
 		end := start
-		if end, _, err = first(end); err != nil {
+		if end, _, err = first(ctx, end); err != nil {
 			return start, zero[M](), err
 		}
-		if end, res, err = middle(end); err != nil {
+		if end, res, err = middle(ctx, end); err != nil {
 			return start, zero[M](), err
 		}
-		if end, _, err = last(end); err != nil {
+		if end, _, err = last(ctx, end); err != nil {
 			return start, zero[M](), err
 		}
 		return end, res, nil
@@ -40,16 +42,16 @@ func Surrounded[C comparable, F, L, M any](first ParseFn[C, F], last ParseFn[C, 
 }
 
 func Preceded[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B]) ParseFn[C, B] {
-	return Trace(func(start Cursor[C]) (Cursor[C], B, error) {
+	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], B, error) {
 		var (
 			res B
 			err error
 		)
 		end := start
-		if end, _, err = first(end); err != nil {
+		if end, _, err = first(ctx, end); err != nil {
 			return start, zero[B](), err
 		}
-		if end, res, err = second(end); err != nil {
+		if end, res, err = second(ctx, end); err != nil {
 			return start, zero[B](), err
 		}
 		return end, res, nil
@@ -57,17 +59,17 @@ func Preceded[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B])
 }
 
 func Terminated[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B]) ParseFn[C, A] {
-	return Trace(func(start Cursor[C]) (Cursor[C], A, error) {
+	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], A, error) {
 		var (
 			res A
 			err error
 		)
 		end := start
-		end, res, err = first(end)
+		end, res, err = first(ctx, end)
 		if err != nil {
 			return start, zero[A](), err
 		}
-		end, _, err = second(end)
+		end, _, err = second(ctx, end)
 		if err != nil {
 			return start, zero[A](), err
 		}

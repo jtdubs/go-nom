@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -12,13 +13,13 @@ func TestCache(t *testing.T) {
 
 	f := func(r rune) string { return fmt.Sprintf("Result: %q", r) }
 
-	parseFn := Cache(func(c nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	parseFn := Cache(func(_ context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
 		count = count + 1
-		if c.EOF() {
-			return c, "EOF", nil
+		if start.EOF() {
+			return start, "EOF", nil
 		}
-		result := f(c.Read())
-		return c.Next(), result, nil
+		result := f(start.Read())
+		return start.Next(), result, nil
 	})
 
 	for _, msg := range []string{"Hello", "World"} {
@@ -26,7 +27,7 @@ func TestCache(t *testing.T) {
 		c := nom.NewCursor([]rune(msg))
 		for !c.EOF() {
 			for i := 0; i < 10; i++ {
-				_, got, err := parseFn(c)
+				_, got, err := parseFn(context.Background(), c)
 				if err != nil {
 					t.Errorf("parseFn() returned unexpected err: %v", err)
 					return

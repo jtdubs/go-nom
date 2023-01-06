@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"log"
 	"runtime"
 
@@ -39,10 +40,10 @@ func CacheN[C comparable, T any](skip int, fn nom.ParseFn[C, T]) nom.ParseFn[C, 
 		return fn
 	}
 
-	return func(start nom.Cursor[C]) (nom.Cursor[C], T, error) {
+	return func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], T, error) {
 		cacheVal, ok := cache[start.Addr()]
 		if !ok {
-			end, res, err := fn(start)
+			end, res, err := fn(ctx, start)
 			cacheVal = cacheValue[C, T]{end, res, err}
 			cache[start.Addr()] = cacheVal
 		}

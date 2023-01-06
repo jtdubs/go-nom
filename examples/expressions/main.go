@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -55,24 +56,24 @@ func CT[T any](p nom.ParseFn[rune, T]) nom.ParseFn[rune, T] {
 	return nom.TraceN(1, cache.CacheN(1, p))
 }
 
-func Number(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
+func Number(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 	atoi := func(s string) Expr {
 		n, _ := strconv.Atoi(s)
 		return &NumExpr{n}
 	}
 
-	return CT(nom.Map(runes.Digit1, atoi))(start)
+	return CT(nom.Map(runes.Digit1, atoi))(ctx, start)
 }
 
-func Expression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
-	return CT(nom.Alt(Parens, SumExpression))(start)
+func Expression(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
+	return CT(nom.Alt(Parens, SumExpression))(ctx, start)
 }
 
-func Parens(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
-	return CT(runes.SurroundedBy('(', ')', Expression))(start)
+func Parens(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
+	return CT(runes.SurroundedBy('(', ')', Expression))(ctx, start)
 }
 
-func SumExpression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
+func SumExpression(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 	be := &BinaryExpr{}
 	return CT(
 		nom.Alt(
@@ -85,14 +86,14 @@ func SumExpression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 			),
 			ProductExpression,
 		),
-	)(start)
+	)(ctx, start)
 }
 
-func SumOperator(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return CT(runes.OneOf("+-"))(start)
+func SumOperator(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return CT(runes.OneOf("+-"))(ctx, start)
 }
 
-func ProductExpression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
+func ProductExpression(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 	be := &BinaryExpr{}
 	return CT(
 		nom.Alt(
@@ -105,15 +106,15 @@ func ProductExpression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 			),
 			Term,
 		),
-	)(start)
+	)(ctx, start)
 }
 
-func ProductOperator(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
-	return CT(runes.OneOf("*/"))(start)
+func ProductOperator(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return CT(runes.OneOf("*/"))(ctx, start)
 }
 
-func Term(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
-	return CT(nom.Alt(Number, Parens))(start)
+func Term(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
+	return CT(nom.Alt(Number, Parens))(ctx, start)
 }
 
 func init() {
@@ -126,9 +127,10 @@ func main() {
 		opts.IncludePackage("main")
 		return opts.Tracer()
 	}()
+	ctx := context.Background()
 
 	start := runes.Cursor("    (1*7 + 1 + (2*3+	4/2))  ").WithTracer(tracer)
-	rest, result, err := Expression(start)
+	rest, result, err := Expression(ctx, start)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 		return
