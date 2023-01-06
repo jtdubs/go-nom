@@ -172,3 +172,12 @@ func First[C comparable, T, U any](p ParseFn[C, Tuple[T, U]]) ParseFn[C, T] {
 func Second[C comparable, T, U any](p ParseFn[C, Tuple[T, U]]) ParseFn[C, U] {
 	return Trace(Map(p, func(t Tuple[T, U]) U { return t.B }))
 }
+
+func Spanning[C comparable, T any](p ParseFn[C, T]) ParseFn[C, Span[C]] {
+	return Trace(func(start Cursor[C]) (end Cursor[C], res Span[C], err error) {
+		res.Start = start
+		end, _, err = p(start)
+		res.End = end
+		return
+	})
+}

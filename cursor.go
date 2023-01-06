@@ -2,16 +2,13 @@ package nom
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type Cursor[T comparable] struct {
 	buffer []T
 	offset int
 	tracer Tracer[T]
-}
-
-type Span[T comparable] struct {
-	Start, End Cursor[T]
 }
 
 func NewCursor[T comparable](ts []T) Cursor[T] {
@@ -96,4 +93,21 @@ func (c Cursor[T]) Addr() *T {
 		return nil
 	}
 	return &c.buffer[c.offset]
+}
+
+type Span[T comparable] struct {
+	Start, End Cursor[T]
+}
+
+func (s Span[T]) Value() []T {
+	return s.Start.To(s.End)
+}
+
+func (s Span[T]) String() string {
+	switch slice := reflect.ValueOf(s.Start.To(s.End)).Interface().(type) {
+	case []rune:
+		return fmt.Sprintf("Span(%q)", string(slice))
+	default:
+		return fmt.Sprintf("Span(%v...%v)", s.Start.Position(), s.End.Position())
+	}
 }
