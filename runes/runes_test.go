@@ -107,14 +107,6 @@ func TestNewline(t *testing.T) {
 	validate(t, "Newline(%q)", p, "", 0, rune(0), true)
 }
 
-func TestConcat(t *testing.T) {
-	p := Join(nom.ManyN(5, 5, nom.Any[rune]))
-	validate(t, "String(%q)", p, "Hello World", 5, "Hello", false)
-	validate(t, "String(%q)", p, "Hello", 5, "Hello", false)
-	validate(t, "String(%q)", p, "Hell", 0, "", true)
-	validate(t, "String(%q)", p, "", 0, "", true)
-}
-
 func TestAlpha(t *testing.T) {
 	p := Alpha()
 	validate(t, "Alpha(%q)", p, "Hello World", 1, 'H', false)
@@ -314,4 +306,19 @@ func TestRecognize(t *testing.T) {
 	validate(t, "Recognize(%q)", p, "Hello world", 5, "Hello", false)
 	validate(t, "Recognize(%q)", p, "H", 1, "H", false)
 	validate(t, "Recognize(%q)", p, "", 0, "", true)
+}
+
+func TestConcat(t *testing.T) {
+	p := Concat(nom.Seq(Alpha1(), Space1(), Alpha1()))
+	validate(t, "Concat(%q)", p, "Hello world", 11, "Hello world", false)
+	validate(t, "Concat(%q)", p, "H", 0, "", true)
+	validate(t, "Concat(%q)", p, "", 0, "", true)
+}
+
+func TestCons(t *testing.T) {
+	p := Cons(Alpha(), Digit0())
+	validate(t, "Concat(%q)", p, "a123", 4, "a123", false)
+	validate(t, "Concat(%q)", p, "a", 1, "a", false)
+	validate(t, "Concat(%q)", p, "abc", 1, "a", false)
+	validate(t, "Concat(%q)", p, "123", 0, "", true)
 }

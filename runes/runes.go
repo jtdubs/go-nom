@@ -205,11 +205,7 @@ func Surrounded[T, U, V any](left nom.ParseFn[rune, T], right nom.ParseFn[rune, 
 }
 
 func SurroundedBy[T any](left, right rune, middle nom.ParseFn[rune, T]) nom.ParseFn[rune, T] {
-	return nom.Trace(nom.Surrounded(
-		nom.Preceded(Space0(), Rune(left)),
-		nom.Preceded(Space0(), Rune(right)),
-		nom.Preceded(Space0(), middle),
-	))
+	return nom.Trace(Surrounded(Rune(left), Rune(right), middle))
 }
 
 func Recognize[T any](p nom.ParseFn[rune, T]) nom.ParseFn[rune, string] {
