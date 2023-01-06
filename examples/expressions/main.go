@@ -7,8 +7,9 @@ import (
 
 	"github.com/jtdubs/go-nom"
 	"github.com/jtdubs/go-nom/cache"
-	"github.com/jtdubs/go-nom/printtracer"
 	"github.com/jtdubs/go-nom/runes"
+	"github.com/jtdubs/go-nom/trace"
+	"github.com/jtdubs/go-nom/trace/printtracer"
 )
 
 type Expr interface {
@@ -53,7 +54,7 @@ func (n *NumExpr) Value() int {
 }
 
 func CT[T any](p nom.ParseFn[rune, T]) nom.ParseFn[rune, T] {
-	return nom.TraceN(1, cache.CacheN(1, p))
+	return trace.TraceN(1, cache.CacheN(1, p))
 }
 
 func Number(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
@@ -118,18 +119,18 @@ func Term(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, 
 }
 
 func init() {
-	nom.TraceSupported()
+	trace.TraceSupported()
 }
 
 func main() {
-	tracer := func() nom.Tracer[rune] {
+	tracer := func() trace.Tracer[rune] {
 		var opts printtracer.Options[rune]
 		opts.IncludePackage("main")
 		return opts.Tracer()
 	}()
-	ctx := nom.WithTracing(nom.WithTracer(context.Background(), tracer))
+	ctx := trace.WithTracing(trace.WithTracer(context.Background(), tracer))
 
-	start := runes.Cursor("    (1*7 + 1 + (2*3+	4/2))  ").WithTracer(tracer)
+	start := runes.Cursor("    (1*7 + 1 + (2*3+	4/2))  ")
 	rest, result, err := Expression(ctx, start)
 	if err != nil {
 		fmt.Printf("Error: %v", err)

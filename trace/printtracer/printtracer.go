@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/jtdubs/go-nom"
+	"github.com/jtdubs/go-nom/trace"
 )
 
 type Options[T comparable] struct {
@@ -44,7 +45,7 @@ func (pt *Options[T]) Exclude(patterns ...string) {
 	}
 }
 
-func (pt *Options[T]) Tracer() nom.Tracer[T] {
+func (pt *Options[T]) Tracer() trace.Tracer[T] {
 	if pt.allowlist == nil {
 		pt.allowlist = make(map[*regexp.Regexp]struct{})
 	}
@@ -64,7 +65,7 @@ type tracer[T comparable] struct {
 	blocklist map[*regexp.Regexp]struct{}
 }
 
-func New[T comparable]() nom.Tracer[T] {
+func New[T comparable]() trace.Tracer[T] {
 	return &tracer[T]{0, make(map[*regexp.Regexp]struct{}), make(map[*regexp.Regexp]struct{})}
 }
 

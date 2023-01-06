@@ -21,13 +21,6 @@ func (c Cursor[T]) String() string {
 	return fmt.Sprintf("Cursor(%v)", c.offset)
 }
 
-func (c Cursor[T]) WithTracer(t Tracer[T]) Cursor[T] {
-	return Cursor[T]{
-		buffer: c.buffer,
-		offset: c.offset,
-	}
-}
-
 func (c Cursor[T]) EOF() bool {
 	return c.offset >= len(c.buffer)
 }

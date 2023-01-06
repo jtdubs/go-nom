@@ -3,7 +3,7 @@ package nom
 import "context"
 
 func Seq[C comparable, T any](ps ...ParseFn[C, T]) ParseFn[C, []T] {
-	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
+	return func(ctx context.Context, start Cursor[C]) (Cursor[C], []T, error) {
 		var results []T
 		end := start
 		for _, p := range ps {
@@ -18,11 +18,11 @@ func Seq[C comparable, T any](ps ...ParseFn[C, T]) ParseFn[C, []T] {
 			results = append(results, result)
 		}
 		return end, results, nil
-	})
+	}
 }
 
 func Surrounded[C comparable, F, L, M any](first ParseFn[C, F], last ParseFn[C, L], middle ParseFn[C, M]) ParseFn[C, M] {
-	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], M, error) {
+	return func(ctx context.Context, start Cursor[C]) (Cursor[C], M, error) {
 		var (
 			res M
 			err error
@@ -38,11 +38,11 @@ func Surrounded[C comparable, F, L, M any](first ParseFn[C, F], last ParseFn[C, 
 			return start, zero[M](), err
 		}
 		return end, res, nil
-	})
+	}
 }
 
 func Preceded[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B]) ParseFn[C, B] {
-	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], B, error) {
+	return func(ctx context.Context, start Cursor[C]) (Cursor[C], B, error) {
 		var (
 			res B
 			err error
@@ -55,11 +55,11 @@ func Preceded[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B])
 			return start, zero[B](), err
 		}
 		return end, res, nil
-	})
+	}
 }
 
 func Terminated[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B]) ParseFn[C, A] {
-	return Trace(func(ctx context.Context, start Cursor[C]) (Cursor[C], A, error) {
+	return func(ctx context.Context, start Cursor[C]) (Cursor[C], A, error) {
 		var (
 			res A
 			err error
@@ -74,5 +74,5 @@ func Terminated[C comparable, A, B any](first ParseFn[C, A], second ParseFn[C, B
 			return start, zero[A](), err
 		}
 		return end, res, nil
-	})
+	}
 }

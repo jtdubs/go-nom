@@ -1,9 +1,11 @@
-package nom
+package trace
 
 import (
 	"context"
 	"runtime"
 	"strings"
+
+	"github.com/jtdubs/go-nom"
 )
 
 type ContextKeyType int
@@ -26,8 +28,8 @@ func WithoutTracing(ctx context.Context) context.Context {
 }
 
 type Tracer[T comparable] interface {
-	Enter(ctx context.Context, name string, start Cursor[T])
-	Exit(ctx context.Context, name string, start, end Cursor[T], result any, err error)
+	Enter(ctx context.Context, name string, start nom.Cursor[T])
+	Exit(ctx context.Context, name string, start, end nom.Cursor[T], result any, err error)
 }
 
 var traceSupported = false
@@ -36,11 +38,11 @@ func TraceSupported() {
 	traceSupported = true
 }
 
-func Trace[C comparable, T any](fn ParseFn[C, T]) ParseFn[C, T] {
+func Trace[C comparable, T any](fn nom.ParseFn[C, T]) nom.ParseFn[C, T] {
 	return TraceN(1, fn)
 }
 
-func TraceN[C comparable, T any](depth int, fn ParseFn[C, T]) ParseFn[C, T] {
+func TraceN[C comparable, T any](depth int, fn nom.ParseFn[C, T]) nom.ParseFn[C, T] {
 	if !traceSupported {
 		return fn
 	}
@@ -58,7 +60,7 @@ func TraceN[C comparable, T any](depth int, fn ParseFn[C, T]) ParseFn[C, T] {
 		}
 	}
 
-	return func(ctx context.Context, start Cursor[C]) (end Cursor[C], res T, err error) {
+	return func(ctx context.Context, start nom.Cursor[C]) (end nom.Cursor[C], res T, err error) {
 		tracer, ok := ctx.Value(TracerKey).(Tracer[C])
 		tracingEnabled, _ := ctx.Value(TraceEnabledKey).(bool)
 		if ok && tracingEnabled {
