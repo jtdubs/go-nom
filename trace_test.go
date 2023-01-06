@@ -16,11 +16,11 @@ func newTracer() *testTracer {
 	}
 }
 
-func (t *testTracer) Enter(name string, cursor Cursor[rune]) {
+func (t *testTracer) Enter(_ context.Context, name string, cursor Cursor[rune]) {
 	t.enterCounts[name]++
 }
 
-func (t *testTracer) Exit(name string, start, end Cursor[rune], result any, err error) {
+func (t *testTracer) Exit(_ context.Context, name string, start, end Cursor[rune], result any, err error) {
 	t.exitCounts[name]++
 }
 
@@ -33,16 +33,16 @@ func testParseChar(ctx context.Context, start Cursor[rune]) (Cursor[rune], rune,
 }
 
 func TestTracing(t *testing.T) {
-	EnableTrace()
+	TraceSupported()
 
 	tracer := newTracer()
-	c := NewCursor([]rune("123456")).WithTracer(tracer)
-	ctx := context.Background()
+	c := NewCursor([]rune("123456"))
+	ctx := WithTracing(WithTracer[rune](context.Background(), tracer))
 
 	var wantWord, wantChar int
 	for i := 0; i < 10; i = i + 1 {
 		if i == 5 {
-			DisableTrace()
+			ctx = WithoutTracing(ctx)
 		}
 		testParseWord(ctx, c)
 		if i < 5 {

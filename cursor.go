@@ -8,14 +8,12 @@ import (
 type Cursor[T comparable] struct {
 	buffer []T
 	offset int
-	tracer Tracer[T]
 }
 
 func NewCursor[T comparable](ts []T) Cursor[T] {
 	return Cursor[T]{
 		buffer: ts,
 		offset: 0,
-		tracer: nil,
 	}
 }
 
@@ -27,12 +25,7 @@ func (c Cursor[T]) WithTracer(t Tracer[T]) Cursor[T] {
 	return Cursor[T]{
 		buffer: c.buffer,
 		offset: c.offset,
-		tracer: t,
 	}
-}
-
-func (c Cursor[T]) Tracer() Tracer[T] {
-	return c.tracer
 }
 
 func (c Cursor[T]) EOF() bool {
@@ -69,7 +62,6 @@ func (c Cursor[T]) Next() Cursor[T] {
 	return Cursor[T]{
 		buffer: c.buffer,
 		offset: c.offset + 1,
-		tracer: c.tracer,
 	}
 }
 
@@ -77,7 +69,6 @@ func (c Cursor[T]) ToEOF() Cursor[T] {
 	return Cursor[T]{
 		buffer: c.buffer,
 		offset: len(c.buffer),
-		tracer: c.tracer,
 	}
 }
 

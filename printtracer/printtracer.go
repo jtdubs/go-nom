@@ -1,6 +1,7 @@
 package printtracer
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -86,7 +87,7 @@ func (pt *tracer[T]) skip(name string) bool {
 	return true
 }
 
-func (bt *tracer[T]) Enter(name string, start nom.Cursor[T]) {
+func (bt *tracer[T]) Enter(_ context.Context, name string, start nom.Cursor[T]) {
 	if bt.skip(name) {
 		return
 	}
@@ -97,7 +98,7 @@ func (bt *tracer[T]) Enter(name string, start nom.Cursor[T]) {
 	bt.level = bt.level + 1
 }
 
-func (bt *tracer[T]) Exit(name string, start, end nom.Cursor[T], result any, err error) {
+func (bt *tracer[T]) Exit(_ context.Context, name string, start, end nom.Cursor[T], result any, err error) {
 	if bt.skip(name) {
 		return
 	}

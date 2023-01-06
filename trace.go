@@ -6,21 +6,34 @@ import (
 	"strings"
 )
 
-var (
-	traceEnabled bool
+type ContextKeyType int
+
+const (
+	TracerKey ContextKeyType = iota
+	TraceEnabledKey
 )
 
+func WithTracer[T comparable](ctx context.Context, tracer Tracer[T]) context.Context {
+	return context.WithValue(ctx, TracerKey, tracer)
+}
+
+func WithTracing(ctx context.Context) context.Context {
+	return context.WithValue(ctx, TraceEnabledKey, true)
+}
+
+func WithoutTracing(ctx context.Context) context.Context {
+	return context.WithValue(ctx, TraceEnabledKey, false)
+}
+
 type Tracer[T comparable] interface {
-	Enter(name string, start Cursor[T])
-	Exit(name string, start, end Cursor[T], result any, err error)
+	Enter(ctx context.Context, name string, start Cursor[T])
+	Exit(ctx context.Context, name string, start, end Cursor[T], result any, err error)
 }
 
-func EnableTrace() {
-	traceEnabled = true
-}
+var traceSupported = false
 
-func DisableTrace() {
-	traceEnabled = false
+func TraceSupported() {
+	traceSupported = true
 }
 
 func Trace[C comparable, T any](fn ParseFn[C, T]) ParseFn[C, T] {
@@ -28,7 +41,7 @@ func Trace[C comparable, T any](fn ParseFn[C, T]) ParseFn[C, T] {
 }
 
 func TraceN[C comparable, T any](depth int, fn ParseFn[C, T]) ParseFn[C, T] {
-	if !traceEnabled {
+	if !traceSupported {
 		return fn
 	}
 
@@ -46,13 +59,14 @@ func TraceN[C comparable, T any](depth int, fn ParseFn[C, T]) ParseFn[C, T] {
 	}
 
 	return func(ctx context.Context, start Cursor[C]) (end Cursor[C], res T, err error) {
-		tracer := start.Tracer()
-		if tracer != nil {
-			tracer.Enter(name, start)
+		tracer, ok := ctx.Value(TracerKey).(Tracer[C])
+		tracingEnabled, _ := ctx.Value(TraceEnabledKey).(bool)
+		if ok && tracingEnabled {
+			tracer.Enter(ctx, name, start)
 		}
 		end, res, err = fn(ctx, start)
-		if tracer != nil {
-			tracer.Exit(name, start, end, res, err)
+		if ok && tracingEnabled {
+			tracer.Exit(ctx, name, start, end, res, err)
 		}
 		return
 	}

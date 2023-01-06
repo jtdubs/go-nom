@@ -118,7 +118,7 @@ func Term(ctx context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], Expr, 
 }
 
 func init() {
-	nom.EnableTrace()
+	nom.TraceSupported()
 }
 
 func main() {
@@ -127,7 +127,7 @@ func main() {
 		opts.IncludePackage("main")
 		return opts.Tracer()
 	}()
-	ctx := context.Background()
+	ctx := nom.WithTracing(nom.WithTracer(context.Background(), tracer))
 
 	start := runes.Cursor("    (1*7 + 1 + (2*3+	4/2))  ").WithTracer(tracer)
 	rest, result, err := Expression(ctx, start)
