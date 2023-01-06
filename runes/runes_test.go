@@ -308,3 +308,10 @@ func TestSurrounded(t *testing.T) {
 	validate(t, "SurroundedBy(%q)", p, " | hi ) ", 0, "", true)
 	validate(t, "SurroundedBy(%q)", p, " ( 123 ) ", 0, "", true)
 }
+
+func TestRecognize(t *testing.T) {
+	p := Recognize(nom.Discard(Alpha1()))
+	validate(t, "Recognize(%q)", p, "Hello world", 5, "Hello", false)
+	validate(t, "Recognize(%q)", p, "H", 1, "H", false)
+	validate(t, "Recognize(%q)", p, "", 0, "", true)
+}
