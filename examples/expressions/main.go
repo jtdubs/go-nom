@@ -61,7 +61,7 @@ func Number(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {
 		return &NumExpr{n}
 	}
 
-	return CT(nom.Map(runes.Digit1(), atoi))(start)
+	return CT(nom.Map(runes.Digit1, atoi))(start)
 }
 
 func Expression(start nom.Cursor[rune]) (nom.Cursor[rune], Expr, error) {

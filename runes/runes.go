@@ -60,12 +60,12 @@ func NoneOf(blocklist string) nom.ParseFn[rune, rune] {
 	})
 }
 
-func EOL() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Preceded(nom.Opt(Rune('\r')), Rune('\n')))
+func EOL(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Preceded(nom.Opt(Rune('\r')), Rune('\n')))(start)
 }
 
-func Newline() nom.ParseFn[rune, rune] {
-	return Rune('\n')
+func Newline(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return Rune('\n')(start)
 }
 
 func IsAlpha(r rune) bool {
@@ -84,7 +84,7 @@ func IsHexDigit(r rune) bool {
 	return (r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F')
 }
 
-func IsOctDigit(r rune) bool {
+func IsOctalDigit(r rune) bool {
 	return (r >= '0' && r <= '7')
 }
 
@@ -100,107 +100,107 @@ func IsSign(r rune) bool {
 	return r == '+' || r == '-'
 }
 
-func Alpha() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsAlpha))
+func Alpha(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsAlpha))(start)
 }
 
-func Alpha0() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlpha))))
+func Alpha0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlpha))))(start)
 }
 
-func Alpha1() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlpha))))
+func Alpha1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlpha))))(start)
 }
 
-func Digit() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsDigit))
+func Digit(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsDigit))(start)
 }
 
-func Digit0() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsDigit))))
+func Digit0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsDigit))))(start)
 }
 
-func Digit1() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsDigit))))
+func Digit1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsDigit))))(start)
 }
 
-func HexDigit() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsHexDigit))
+func HexDigit(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsHexDigit))(start)
 }
 
-func HexDigit0() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsHexDigit))))
+func HexDigit0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsHexDigit))))(start)
 }
 
-func HexDigit1() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsHexDigit))))
+func HexDigit1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsHexDigit))))(start)
 }
 
-func OctDigit() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsOctDigit))
+func OctalDigit(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsOctalDigit))(start)
 }
 
-func OctDigit0() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsOctDigit))))
+func OctalDigit0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsOctalDigit))))(start)
 }
 
-func OctDigit1() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsOctDigit))))
+func OctalDigit1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsOctalDigit))))(start)
 }
 
-func Alphanumeric() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsAlphanumeric))
+func Alphanumeric(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsAlphanumeric))(start)
 }
 
-func Alphanumeric0() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlphanumeric))))
+func Alphanumeric0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsAlphanumeric))))(start)
 }
 
-func Alphanumeric1() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlphanumeric))))
+func Alphanumeric1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsAlphanumeric))))(start)
 }
 
-func Space() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsSpace))
+func Space(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsSpace))(start)
 }
 
-func Space0() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsSpace))))
+func Space0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsSpace))))(start)
 }
 
-func Space1() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsSpace))))
+func Space1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsSpace))))(start)
 }
 
-func Multispace() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsMultispace))
+func Multispace(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsMultispace))(start)
 }
 
-func Multispace0() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsMultispace))))
+func Multispace0(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many0(nom.Satisfy(IsMultispace))))(start)
 }
 
-func Multispace1() nom.ParseFn[rune, string] {
-	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsMultispace))))
+func Multispace1(start nom.Cursor[rune]) (nom.Cursor[rune], string, error) {
+	return nom.Trace(Join(nom.Many1(nom.Satisfy(IsMultispace))))(start)
 }
 
-func Sign() nom.ParseFn[rune, rune] {
-	return nom.Trace(nom.Satisfy(IsSign))
+func Sign(start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+	return nom.Trace(nom.Satisfy(IsSign))(start)
 }
 
 func Phrase[T any](ps ...nom.ParseFn[rune, T]) nom.ParseFn[rune, []T] {
 	var parts []nom.ParseFn[rune, T]
 	for _, p := range ps {
-		parts = append(parts, nom.Preceded(Space0(), p))
+		parts = append(parts, nom.Preceded(Space0, p))
 	}
 	return nom.Trace(nom.Seq(parts...))
 }
 
 func Surrounded[T, U, V any](left nom.ParseFn[rune, T], right nom.ParseFn[rune, U], middle nom.ParseFn[rune, V]) nom.ParseFn[rune, V] {
 	return nom.Trace(nom.Surrounded(
-		nom.Preceded(Space0(), left),
-		nom.Preceded(Space0(), right),
-		nom.Preceded(Space0(), middle),
+		nom.Preceded(Space0, left),
+		nom.Preceded(Space0, right),
+		nom.Preceded(Space0, middle),
 	))
 }
 
