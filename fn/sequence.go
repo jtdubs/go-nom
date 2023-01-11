@@ -81,3 +81,7 @@ func Terminated[C comparable, A, B any](first nom.ParseFn[C, A], second nom.Pars
 		return end, res, nil
 	})
 }
+
+func Append[C comparable, A any](first nom.ParseFn[C, []A], rest ...nom.ParseFn[C, A]) nom.ParseFn[C, []A] {
+	return trace.Trace(Map(Pair(first, Seq(rest...)), func(t nom.Tuple[[]A, []A]) []A { return append(t.A, t.B...) }))
+}
