@@ -179,7 +179,7 @@ func Pair[C comparable, T, U any](t nom.ParseFn[C, T], u nom.ParseFn[C, U]) nom.
 		if err != nil {
 			return start, zero[nom.Tuple[T, U]](), err
 		}
-		return end, nom.Tuple[T, U]{a, b}, nil
+		return end, nom.Tuple[T, U]{A: a, B: b}, nil
 	})
 }
 
