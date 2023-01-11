@@ -38,6 +38,12 @@ func TraceSupported() {
 	traceSupported = true
 }
 
+func Hidden[C comparable, T any](fn nom.ParseFn[C, T]) nom.ParseFn[C, T] {
+	return func(ctx context.Context, start nom.Cursor[C]) (nom.Cursor[C], T, error) {
+		return fn(WithoutTracing(ctx), start)
+	}
+}
+
 func Trace[C comparable, T any](fn nom.ParseFn[C, T]) nom.ParseFn[C, T] {
 	return TraceN(1, fn)
 }
