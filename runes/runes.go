@@ -12,7 +12,15 @@ import (
 )
 
 func Rune(want rune) nom.ParseFn[rune, rune] {
-	return trace.Trace(fn.Expect(want))
+	return trace.Trace(func(_ context.Context, start nom.Cursor[rune]) (nom.Cursor[rune], rune, error) {
+		if start.EOF() {
+			return start, rune(0), fmt.Errorf("got %q, want EOF", string(start.Read()))
+		}
+		if got := start.Read(); got != want {
+			return start, rune(0), fmt.Errorf("got %q, want %q", string(got), string(want))
+		}
+		return start.Next(), want, nil
+	})
 }
 
 func RuneNoCase(want rune) nom.ParseFn[rune, rune] {
