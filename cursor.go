@@ -2,7 +2,6 @@ package nom
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type Cursor[T comparable] struct {
@@ -88,7 +87,7 @@ func (s Span[T]) Value() []T {
 }
 
 func (s Span[T]) String() string {
-	switch slice := reflect.ValueOf(s.Start.To(s.End)).Interface().(type) {
+	switch slice := any(s.Start.To(s.End)).(type) {
 	case []rune:
 		return fmt.Sprintf("Span(%q)", string(slice))
 	default:

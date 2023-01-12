@@ -3,7 +3,6 @@ package printtracer
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"regexp"
 
 	"github.com/jtdubs/go-nom"
@@ -114,8 +113,8 @@ func (bt *tracer[T]) Exit(_ context.Context, name string, start, end nom.Cursor[
 		default:
 			fmt.Printf("< %v", result)
 		}
-		span := reflect.ValueOf(start.To(end)).Interface()
-		switch rs := span.(type) {
+
+		switch rs := any(start.To(end)).(type) {
 		case []rune:
 			s := string(rs)
 			if len(s) > 20 {
