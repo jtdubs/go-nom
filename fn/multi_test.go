@@ -68,11 +68,15 @@ func TestSeparatedList1(t *testing.T) {
 
 func TestManyTill(t *testing.T) {
 	p := ManyTill(Satisfy(func(r rune) bool { return r >= '0' && r <= '9' }), Expect('X'))
-	validate(t, "ManyTill(%q)", p, "1234X hello", 5, nom.Tuple[[]rune, rune]{[]rune("1234"), 'X'}, false)
-	validate(t, "ManyTill(%q)", p, "1234X", 5, nom.Tuple[[]rune, rune]{[]rune("1234"), 'X'}, false)
-	validate(t, "ManyTill(%q)", p, "1234Y", 0, nom.Tuple[[]rune, rune]{}, true)
-	validate(t, "ManyTill(%q)", p, "12c4X", 0, nom.Tuple[[]rune, rune]{}, true)
-	validate(t, "ManyTill(%q)", p, "X", 1, nom.Tuple[[]rune, rune]{nil, 'X'}, false)
-	validate(t, "ManyTill(%q)", p, "123", 0, nom.Tuple[[]rune, rune]{}, true)
-	validate(t, "ManyTill(%q)", p, "", 0, nom.Tuple[[]rune, rune]{}, true)
+	validate(t, "ManyTill(%q)", p, "1234X hello", 5, tuple([]rune("1234"), 'X'), false)
+	validate(t, "ManyTill(%q)", p, "1234X", 5, tuple([]rune("1234"), 'X'), false)
+	validate(t, "ManyTill(%q)", p, "1234Y", 0, tuple([]rune{}, rune(0)), true)
+	validate(t, "ManyTill(%q)", p, "12c4X", 0, tuple([]rune{}, rune(0)), true)
+	validate(t, "ManyTill(%q)", p, "X", 1, tuple([]rune{}, 'X'), false)
+	validate(t, "ManyTill(%q)", p, "123", 0, tuple([]rune{}, rune(0)), true)
+	validate(t, "ManyTill(%q)", p, "", 0, tuple([]rune{}, rune(0)), true)
+}
+
+func tuple[A, B any](a A, b B) nom.Tuple[A, B] {
+	return nom.Tuple[A, B]{A: a, B: b}
 }
